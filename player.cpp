@@ -66,19 +66,18 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
 
     //Part 1 random method:
 
-    // for (int i = 0; i < 8; i++)
-    // {
-    //     for (int j = 0; j < 8; j++)
-    //     {
-    //         Move * move = new Move(i, j);
-    //         if (board -> checkMove(move, mySide))
-    //         {
-    //             board -> doMove(move, mySide);
-    //             return move;
-    //         }
-    //     }
-    // }
-
+     /*for (int i = 0; i < 8; i++)
+     {
+         for (int j = 0; j < 8; j++)
+         {
+             Move * move = new Move(i, j);
+             if (board -> checkMove(move, mySide))
+             {
+                 board -> doMove(move, mySide);
+                 return move;
+             }
+         }
+     }*/
     Board * boardCopy = board -> copy();
     int bestX = -1, bestY = -1, bestScore = -999999;
     Move * move;

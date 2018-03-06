@@ -56,9 +56,11 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
      * process the opponent's opponents move before calculating your own move
      */
 
+    //If opponents move is legal, do it
     if (board -> checkMove(opponentsMove, oppSide))
         board -> doMove(opponentsMove, oppSide);
 
+    //Test if no valid moves
     if(!(board -> hasMoves(mySide)))
         return nullptr;
 
@@ -82,26 +84,34 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     Move * move;
     int myScore = 0;
 
+    //Loop through all spots on board
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
         {
             myScore = 0;
             move = new Move(i, j);
+
+            //Check if move at current spot is legal
             if (board -> checkMove(move, mySide))
             {
+                //If legal make the move on the board copy
                 boardCopy -> doMove(move, mySide);
                 for (int r = 0; r < 8; r++)
                 {
                     for (int c = 0; c < 8; c++)
                     {
                         if (boardCopy -> get(mySide, r, c))
+                            //Add the weighted score at this spot if I have a piece there
                             myScore += scores[r][c];
                         else if (boardCopy -> get(oppSide, r, c))
+                            //Subtract the weighted score at this spot if
+                            //my oppenent has a piece there
                             myScore -= scores[r][c];
                     }
                 }
 
+                //Update best score, best position, and board copy
                 if (myScore > bestScore)
                 {
                     bestScore = myScore;
@@ -113,9 +123,11 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
         }
     }
 
+    //If score hasn't changed we have no available moves
     if (bestX == -1 && bestY == -1)
         return nullptr;
 
+    //Make move with best position and return it
     move -> setX(bestX);
     move -> setY(bestY);
     board -> doMove(move, mySide);

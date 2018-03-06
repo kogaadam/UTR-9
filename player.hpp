@@ -6,6 +6,7 @@
 #include "board.hpp"
 using namespace std;
 
+//Table of weights representing how optimal the position is
 int scores [8][8] = {{7, 2, 5, 4, 4, 5, 2, 7},
 					 {2, 1, 3, 3, 3, 3, 1, 2},
 				  	 {5, 3, 6, 5, 5, 6, 3, 5},

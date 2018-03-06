@@ -62,18 +62,62 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     if(!(board -> hasMoves(mySide)))
         return nullptr;
 
+    //Part 1 random method:
+
+    // for (int i = 0; i < 8; i++)
+    // {
+    //     for (int j = 0; j < 8; j++)
+    //     {
+    //         Move * move = new Move(i, j);
+    //         if (board -> checkMove(move, mySide))
+    //         {
+    //             board -> doMove(move, mySide);
+    //             return move;
+    //         }
+    //     }
+    // }
+
+    Board * boardCopy = board -> copy();
+    int bestX = -1, bestY = -1, bestScore = -999999;
+    Move * move;
+    int myScore = 0;
+
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
         {
-            Move * move = new Move(i, j);
+            myScore = 0;
+            move = new Move(i, j);
             if (board -> checkMove(move, mySide))
             {
-                board -> doMove(move, mySide);
-                return move;
+                boardCopy -> doMove(move, mySide);
+                for (int r = 0; r < 8; r++)
+                {
+                    for (int c = 0; c < 8; c++)
+                    {
+                        if (boardCopy -> get(mySide, r, c))
+                            myScore += scores[r][c];
+                        else if (boardCopy -> get(oppSide, r, c))
+                            myScore -= scores[r][c];
+                    }
+                }
+
+                if (myScore > bestScore)
+                {
+                    bestScore = myScore;
+                    bestX = i;
+                    bestY = j;
+                }
+                boardCopy = board -> copy();
             }
         }
     }
 
-    return nullptr;
+    if (bestX == -1 && bestY == -1)
+        return nullptr;
+
+    move -> setX(bestX);
+    move -> setY(bestY);
+    board -> doMove(move, mySide);
+    return move;
 }

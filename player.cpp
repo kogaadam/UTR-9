@@ -103,11 +103,11 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
                     {
                         if (boardCopy -> get(mySide, r, c))
                             //Add the weighted score at this spot if I have a piece there
-                            myScore += scores[r][c];
+                            myScore += scoreTable[r][c];
                         else if (boardCopy -> get(oppSide, r, c))
                             //Subtract the weighted score at this spot if
                             //my oppenent has a piece there
-                            myScore -= scores[r][c];
+                            myScore -= scoreTable[r][c];
                     }
                 }
 

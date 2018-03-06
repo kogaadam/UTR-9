@@ -1,6 +1,10 @@
 //CHANGE MADE WOOHOO!!!
 // Kevin was here hello
 #include "player.hpp"
+#include <iostream>
+#include <unistd.h>
+
+using namespace std;
 
 /*
  * Constructor for the player; initialize everything here. The side your AI is
@@ -16,6 +20,15 @@ Player::Player(Side side) {
      * precalculating things, etc.) However, remember that you will only have
      * 30 seconds.
      */
+
+    board = new Board();
+    mySide = side;
+
+    if(mySide == WHITE)
+        oppSide = BLACK;
+    else
+        oppSide = WHITE;
+
 }
 
 /*
@@ -42,5 +55,25 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
      * TODO: Implement how moves your AI should play here. You should first
      * process the opponent's opponents move before calculating your own move
      */
+
+    if (board -> checkMove(opponentsMove, oppSide))
+        board -> doMove(opponentsMove, oppSide);
+
+    if(!(board -> hasMoves(mySide)))
+        return nullptr;
+
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            Move * move = new Move(i, j);
+            if (board -> checkMove(move, mySide))
+            {
+                board -> doMove(move, mySide);
+                return move;
+            }
+        }
+    }
+
     return nullptr;
 }

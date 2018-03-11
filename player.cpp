@@ -6,6 +6,17 @@
 
 using namespace std;
 
+
+int scoreTable[8][8] = {{7, 2, 5, 4, 4, 5, 2, 7},
+                     {2, 1, 3, 3, 3, 3, 1, 2},
+                     {5, 3, 6, 5, 5, 6, 3, 5},
+                     {4, 3, 5, 6, 6, 5, 3, 4},
+                     {4, 3, 5, 6, 6, 5, 3, 4},
+                     {5, 3, 6, 5, 5, 6, 3, 5},
+                     {2, 1, 3, 3, 3, 3, 1, 2},
+                     {7, 2, 5, 4, 4, 5, 2, 7},
+                    };
+
 /*
  * Constructor for the player; initialize everything here. The side your AI is
  * on (BLACK or WHITE) is passed in as "side". The constructor must finish

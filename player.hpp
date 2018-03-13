@@ -22,7 +22,7 @@ public:
 
     //int minTheirMove(Board * b);
 
-    int getmobility(Board * b);
+    int getMobility(Board * b);
 
     int calcScore(Board * b);
 

@@ -7,15 +7,15 @@
 
 using namespace std;
 
-
-int scoreTable[8][8] = {{100 , -1 , 5 , 4 , 4 , 5 , -1 , 100},
+//Weights for each position on the board
+int scoreTable[8][8] = {{100 , -1 , 15 , 4 , 4 , 15 , -1 , 100},
                         {-1 , -10 , 3 , 3 , 3 , 3 , -10 , -1},
-                        {5 , 3 , 6 , 5 , 5 , 6 , 3 , 5},
+                        {15 , 3 , 6 , 5 , 5 , 6 , 3 , 15},
                         {4 , 3 , 5 , 6 , 6 , 5 , 3 , 4},
                         {4 , 3 , 5 , 6 , 6 , 5 , 3 , 4},
-                        {5 , 3 , 6 , 5 , 5 , 6 , 3 , 5},
+                        {15 , 3 , 6 , 5 , 5 , 6 , 3 , 15},
                         {-1 , -10 , 3 , 3 , 3 , 3 , -10 , -1},
-                        {100 , 1 , 5 , 4 , 4 , 5 , -1 , 100},
+                        {100 , 1 , 15 , 4 , 4 , 15 , -1 , 100},
                        };
 
 /*
@@ -79,7 +79,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     Board * boardCopy = board -> copy();
     int bestX = -1, bestY = -1, bestScore = -99999999;
     Move * move;
-    int total;
+    int score;
     //Loop through all spots on board
     for (int i = 0; i < 8; i++)
     {
@@ -92,11 +92,12 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
             {
                 //If legal make the move on the board copy
                 boardCopy -> doMove(move, mySide);
-                total = minimax(boardCopy, 4, false);
+                //Run recursive function with depth 4
+                score = minimax(boardCopy, 4, false);
                 //Update best score, best position, and board copy
-                if (total > bestScore)
+                if (score > bestScore)
                 {
-                    bestScore = total;
+                    bestScore = score;
                     bestX = i;
                     bestY = j;
                 }
@@ -116,23 +117,27 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     return move;
 }
 
+//Recursive function to find optimal score
 int Player::minimax(Board * b, int depth, bool maxPlayer)
 {
     int bestScore, currentMin, score, mobility;
     Move * move;
     Side side;
+    //Set correct side depending on who's turn it is
     if(maxPlayer)
         side = mySide;
     else
         side = oppSide;
 
+    //Base case, return score of board
     if(depth == 0)
     {
         score = calcScore(b);
-        mobility = getmobility(b);
+        mobility = getMobility(b);
         return score + mobility;
     }
 
+    //Want to maximize our score
     if(maxPlayer)
     {
         bestScore = -9999999;
@@ -145,6 +150,7 @@ int Player::minimax(Board * b, int depth, bool maxPlayer)
                 if (bCopy -> checkMove(move, side))
                 {
                     bCopy -> doMove(move, side);
+                    //Recurse to lower depth, switch sides
                     currentMin = minimax(bCopy, depth - 1, false);
                     bestScore = max(currentMin, bestScore);
                     bCopy = b -> copy();
@@ -155,6 +161,7 @@ int Player::minimax(Board * b, int depth, bool maxPlayer)
         free(bCopy);
         return bestScore;
     }
+    //Want to minimize their score
     else
     {
         bestScore = 9999999;
@@ -167,6 +174,7 @@ int Player::minimax(Board * b, int depth, bool maxPlayer)
                 if (bCopy -> checkMove(move, side))
                 {
                     bCopy -> doMove(move, side);
+                    //Recurse to lower depth, switch sides
                     currentMin = minimax(bCopy, depth - 1, true);
                     bestScore = min(currentMin, bestScore);
                     bCopy = b -> copy();
@@ -179,7 +187,8 @@ int Player::minimax(Board * b, int depth, bool maxPlayer)
     }
 }
 
-int Player::getmobility(Board * b)
+//Calculates a score based on which positions I can make a move on
+int Player::getMobility(Board * b)
 {
     int mobility = 0;
     Move * mobilitymove;
@@ -188,10 +197,12 @@ int Player::getmobility(Board * b)
         for (int j = 0; j < 8; j++)
         {
             mobilitymove = new Move(i, j);
+            //Add to mobility if I can make a move here
             if (b -> checkMove(mobilitymove, mySide))
             {
                 mobility += 1;
             }
+            //Subtract from mobility if they can make a move here
             if (b -> checkMove(mobilitymove, oppSide))
                 mobility -= 1;
             free(mobilitymove);
@@ -200,7 +211,7 @@ int Player::getmobility(Board * b)
     return mobility;
 }
 
-
+//Calculates a score depending on where I have and don't have a piece
 int Player::calcScore(Board * b)
 {
     int score = 0;
@@ -213,6 +224,7 @@ int Player::calcScore(Board * b)
                 //Add the weighted score at this spot if I have a piece there
                 score += scoreTable[r][c];
             if (b -> get(oppSide, r, c))
+                //Subtract the weighted score at this spot if I don't have a piece there
                 score -= scoreTable[r][c];
         }
     }

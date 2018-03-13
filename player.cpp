@@ -3,18 +3,19 @@
 #include "player.hpp"
 #include <iostream>
 #include <unistd.h>
+#include <algorithm>
 
 using namespace std;
 
 
-int scoreTable[8][8] = {{7, 2, 5, 4, 4, 5, 2, 7},
-                        {2, 1, 3, 3, 3, 3, 1, 2},
-                        {5, 3, 6, 5, 5, 6, 3, 5},
-                        {4, 3, 5, 6, 6, 5, 3, 4},
-                        {4, 3, 5, 6, 6, 5, 3, 4},
-                        {5, 3, 6, 5, 5, 6, 3, 5},
-                        {2, 1, 3, 3, 3, 3, 1, 2},
-                        {7, 2, 5, 4, 4, 5, 2, 7},
+int scoreTable[8][8] = {{100 , -1 , 5 , 4 , 4 , 5 , -1 , 100},
+                        {-1 , -10 , 3 , 3 , 3 , 3 , -10 , -1},
+                        {5 , 3 , 6 , 5 , 5 , 6 , 3 , 5},
+                        {4 , 3 , 5 , 6 , 6 , 5 , 3 , 4},
+                        {4 , 3 , 5 , 6 , 6 , 5 , 3 , 4},
+                        {5 , 3 , 6 , 5 , 5 , 6 , 3 , 5},
+                        {-1 , -10 , 3 , 3 , 3 , 3 , -10 , -1},
+                        {100 , 1 , 5 , 4 , 4 , 5 , -1 , 100},
                        };
 
 /*
@@ -75,31 +76,15 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     if(!(board -> hasMoves(mySide)))
         return nullptr;
 
-    //Part 1 random method:
-
-     /*for (int i = 0; i < 8; i++)
-     {
-         for (int j = 0; j < 8; j++)
-         {
-             Move * move = new Move(i, j);
-             if (board -> checkMove(move, mySide))
-             {
-                 board -> doMove(move, mySide);
-                 return move;
-             }
-         }
-     }*/
     Board * boardCopy = board -> copy();
-    int bestX = -1, bestY = -1, bestScore = -999999;
+    int bestX = -1, bestY = -1, bestScore = -99999999;
     Move * move;
-    int myScore = 0;
-
+    int total;
     //Loop through all spots on board
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
         {
-            myScore = 0;
             move = new Move(i, j);
 
             //Check if move at current spot is legal
@@ -107,24 +92,11 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
             {
                 //If legal make the move on the board copy
                 boardCopy -> doMove(move, mySide);
-                for (int r = 0; r < 8; r++)
-                {
-                    for (int c = 0; c < 8; c++)
-                    {
-                        if (boardCopy -> get(mySide, r, c))
-                            //Add the weighted score at this spot if I have a piece there
-                            myScore += scoreTable[r][c];
-                        else if (boardCopy -> get(oppSide, r, c))
-                            //Subtract the weighted score at this spot if
-                            //my oppenent has a piece there
-                            myScore -= scoreTable[r][c];
-                    }
-                }
-
+                total = minimax(boardCopy, 4, false);
                 //Update best score, best position, and board copy
-                if (myScore > bestScore)
+                if (total > bestScore)
                 {
-                    bestScore = myScore;
+                    bestScore = total;
                     bestX = i;
                     bestY = j;
                 }
@@ -142,4 +114,108 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     move -> setY(bestY);
     board -> doMove(move, mySide);
     return move;
+}
+
+int Player::minimax(Board * b, int depth, bool maxPlayer)
+{
+    int bestScore, currentMin, score, mobility;
+    Move * move;
+    Side side;
+    if(maxPlayer)
+        side = mySide;
+    else
+        side = oppSide;
+
+    if(depth == 0)
+    {
+        score = calcScore(b);
+        mobility = getmobility(b);
+        return score + mobility;
+    }
+
+    if(maxPlayer)
+    {
+        bestScore = -9999999;
+        Board * bCopy = b -> copy();
+        for (int i = 0; i < 8; ++i)
+        {
+            for (int j = 0; j < 8; ++j)
+            {
+                move = new Move(i,j);
+                if (bCopy -> checkMove(move, side))
+                {
+                    bCopy -> doMove(move, side);
+                    currentMin = minimax(bCopy, depth - 1, false);
+                    bestScore = max(currentMin, bestScore);
+                    bCopy = b -> copy();
+                }
+                free(move);
+            }
+        }
+        free(bCopy);
+        return bestScore;
+    }
+    else
+    {
+        bestScore = 9999999;
+        Board * bCopy = b -> copy();
+        for (int i = 0; i < 8; ++i)
+        {
+            for (int j = 0; j < 8; ++j)
+            {
+                move = new Move(i,j);
+                if (bCopy -> checkMove(move, side))
+                {
+                    bCopy -> doMove(move, side);
+                    currentMin = minimax(bCopy, depth - 1, true);
+                    bestScore = min(currentMin, bestScore);
+                    bCopy = b -> copy();
+                }
+                free(move);
+            }
+        }
+        free(bCopy);
+        return bestScore;
+    }
+}
+
+int Player::getmobility(Board * b)
+{
+    int mobility = 0;
+    Move * mobilitymove;
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            mobilitymove = new Move(i, j);
+            if (b -> checkMove(mobilitymove, mySide))
+            {
+                mobility += 1;
+            }
+            if (b -> checkMove(mobilitymove, oppSide))
+                mobility -= 1;
+            free(mobilitymove);
+        }
+    }
+    return mobility;
+}
+
+
+int Player::calcScore(Board * b)
+{
+    int score = 0;
+
+    for (int r = 0; r < 8; r++)
+    {
+        for (int c = 0; c < 8; c++)
+        {
+            if (b -> get(mySide, r, c))
+                //Add the weighted score at this spot if I have a piece there
+                score += scoreTable[r][c];
+            if (b -> get(oppSide, r, c))
+                score -= scoreTable[r][c];
+        }
+    }
+
+    return score;
 }
